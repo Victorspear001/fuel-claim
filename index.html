@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Vehicle Fuel Claiming Form Salem - 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --color-primary: #dc2626;
+            --color-secondary: #fbbf24;
+            --color-background: #fef3c7;
+            --color-surface: #ffffff;
+            --color-text: #1f2937;
+            --color-border: #fca5a5;
+            --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-24: 24px;
+            --radius-base: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: linear-gradient(135deg, #fef3c7 0%, #fecaca 100%);
+            min-height: 100vh;
+            padding: var(--space-24);
+            color: var(--color-text);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #991b1b 100%);
+            color: white;
+            padding: var(--space-24);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .form-content {
+            padding: var(--space-24);
+        }
+
+        .section {
+            margin-bottom: var(--space-24);
+            padding: var(--space-16);
+            background: #fef9f3;
+            border-radius: var(--radius-base);
+            border: 2px solid var(--color-border);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--space-16);
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--color-secondary);
+            border-radius: 2px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-16);
+            margin-bottom: var(--space-16);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--space-8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            padding: var(--space-12);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-base);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: var(--space-12);
+            background: var(--color-secondary);
+            color: var(--color-text);
+            text-align: center;
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #f59e0b;
+        }
+
+        .file-upload-label:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .image-preview {
+            margin-top: var(--space-8);
+            display: flex;
+            gap: var(--space-8);
+            flex-wrap: wrap;
+        }
+
+        .image-preview img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: var(--radius-base);
+            border: 2px solid var(--color-border);
+        }
+
+        .image-preview-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .image-edit-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .image-edit-btn:hover {
+            background: #991b1b;
+        }
+
+        .crop-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .crop-container {
+            background: white;
+            padding: var(--space-24);
+            border-radius: var(--radius-lg);
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+        }
+
+        .crop-canvas-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto var(--space-16);
+            border: 2px solid var(--color-border);
+        }
+
+        .crop-canvas {
+            max-width: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .crop-overlay {
+            position: absolute;
+            border: 2px dashed var(--color-primary);
+            background: rgba(220, 38, 38, 0.1);
+            pointer-events: none;
+        }
+
+        .crop-controls {
+            display: flex;
+            gap: var(--space-12);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .claim-item {
+            background: white;
+            padding: var(--space-16);
+            border-radius: var(--radius-base);
+            border: 2px solid var(--color-secondary);
+            margin-bottom: var(--space-16);
+            position: relative;
+        }
+
+        .claim-number {
+            position: absolute;
+            top: -12px;
+            left: var(--space-16);
+            background: var(--color-primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .btn {
+            padding: var(--space-12) var(--space-24);
+            border: none;
+            border-radius: var(--radius-base);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #991b1b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--color-secondary);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+        }
+
+        .button-group {
+            display: flex;
+            gap: var(--space-12);
+            justify-content: center;
+            margin-top: var(--space-24);
+        }
+
+        .total-section {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #991b1b 100%);
+            color: white;
+            padding: var(--space-24);
+            border-radius: var(--radius-base);
+            text-align: center;
+            margin-top: var(--space-24);
+        }
+
+        .total-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: var(--space-8);
+        }
+
+        .total-amount {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .sheet-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow: auto;
+            padding: var(--space-24);
+        }
+
+        .sheet-content {
+            background: white;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .sheet-content {
+                max-width: 100%;
+            }
+        }
+
+        .sheet-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--space-24);
+            text-transform: uppercase;
+            border-bottom: 3px solid var(--color-primary);
+            padding-bottom: var(--space-12);
+        }
+
+        .sheet-section {
+            margin-bottom: var(--space-24);
+        }
+
+        .sheet-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--space-12);
+            background: var(--color-background);
+            padding: var(--space-8) var(--space-16);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-12);
+            margin-bottom: var(--space-16);
+        }
+
+        .info-item {
+            display: flex;
+            gap: var(--space-8);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--color-text);
+            min-width: 140px;
+        }
+
+        .info-value {
+            color: var(--color-text);
+        }
+
+        .claims-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: var(--space-24);
+        }
+
+        .claims-table th,
+        .claims-table td {
+            border: 2px solid var(--color-border);
+            padding: var(--space-12);
+            text-align: left;
+        }
+
+        .claims-table th {
+            background: var(--color-primary);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        .claims-table tr:nth-child(even) {
+            background: var(--color-background);
+        }
+
+        .images-section {
+            margin-top: var(--space-24);
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-16);
+        }
+
+        .image-item {
+            text-align: center;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-base);
+        }
+
+        .image-caption {
+            font-size: 12px;
+            color: var(--color-text);
+            margin-top: var(--space-8);
+            font-weight: 600;
+        }
+
+        .signature-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: var(--space-24);
+            padding: 0 60px;
+            gap: 120px;
+        }
+
+        .signature-box {
+            flex: 0 0 200px;
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 2px solid var(--color-text);
+            margin: 40px 0 var(--space-8);
+            width: 200px;
+        }
+
+        .signature-label {
+            font-weight: 600;
+            color: var(--color-text);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .alignment-controls {
+            display: flex;
+            gap: var(--space-12);
+            margin-bottom: var(--space-16);
+            flex-wrap: wrap;
+        }
+
+        .alignment-btn {
+            padding: var(--space-8) var(--space-16);
+            border: 2px solid var(--color-border);
+            background: white;
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .alignment-btn:hover {
+            background: var(--color-secondary);
+            border-color: #f59e0b;
+        }
+
+        .alignment-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .close-sheet {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: var(--space-12) var(--space-24);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-weight: 600;
+            z-index: 1001;
+        }
+
+        .close-sheet:hover {
+            background: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>STAFF VEHICLE FUEL CLAIMING FORM SALEM - 1</h1>
+        </div>
+
+        <div class="form-content">
+            <!-- Staff Details Section -->
+            <div class="section">
+                <div class="section-title">Staff Details</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Staff Name</label>
+                        <input type="text" class="form-control" id="staffName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Employee No</label>
+                        <input type="text" class="form-control" id="employeeNo" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Vehicle No</label>
+                        <input type="text" class="form-control" id="vehicleNo" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Vehicle Name</label>
+                        <input type="text" class="form-control" id="vehicleName" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fuel Claims Section -->
+            <div class="section">
+                <div class="section-title">Fuel Claim Details</div>
+                <div id="claimsContainer"></div>
+                <button type="button" class="btn btn-secondary" onclick="addClaim()">
+                    ➕ Add Another Claim
+                </button>
+            </div>
+
+            <!-- Total Section -->
+            <div class="total-section">
+                <div class="total-label">TOTAL CLAIM AMOUNT</div>
+                <div class="total-amount" id="totalAmount">₹0.00</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button type="button" class="btn btn-primary" onclick="generateSheet()">
+                    📄 Generate Final Sheet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crop Modal -->
+    <div class="crop-modal" id="cropModal">
+        <div class="crop-container">
+            <h2 style="margin-bottom: var(--space-16); color: var(--color-primary);">Edit & Crop Image</h2>
+            <div class="crop-canvas-container">
+                <canvas id="cropCanvas" class="crop-canvas"></canvas>
+                <div id="cropOverlay" class="crop-overlay"></div>
+            </div>
+            <div class="crop-controls">
+                <button class="btn btn-secondary" onclick="rotateCropImage('left')">↺ Rotate Left</button>
+                <button class="btn btn-secondary" onclick="rotateCropImage('right')">↻ Rotate Right</button>
+                <button class="btn btn-secondary" onclick="resetCropImage()">🔄 Reset</button>
+                <button class="btn btn-primary" onclick="applyCrop()">✓ Apply Crop</button>
+                <button class="btn btn-remove" onclick="closeCropModal()">✕ Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Sheet Modal -->
+    <div class="sheet-container" id="sheetContainer">
+        <button class="close-sheet" onclick="closeSheet()">✕ Close</button>
+        <div class="sheet-content" id="sheetContent">
+            <!-- Generated sheet will appear here -->
+        </div>
+        <div style="margin-top: 20px;">
+            <div class="alignment-controls" style="justify-content: center; background: white; padding: var(--space-16); border-radius: var(--radius-base);">
+                <span style="font-weight: 600; align-self: center;">JPG Image Alignment:</span>
+                <button class="alignment-btn" onclick="setImageAlignment('portrait')" id="align-portrait">📄 Portrait</button>
+                <button class="alignment-btn active" onclick="setImageAlignment('landscape')" id="align-landscape">🖼️ Landscape</button>
+                <button class="alignment-btn" onclick="setImageAlignment('auto')" id="align-auto">📏 Auto Fit</button>
+            </div>
+            <div class="button-group" style="margin-top: var(--space-16);">
+                <button type="button" class="btn btn-primary" onclick="downloadPDF()">
+                    📥 Download as PDF
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="downloadJPG()">
+                    📥 Download as JPG
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let claimCount = 0;
+        const claims = [];
+
+        function addClaim() {
+            claimCount++;
+            const claimId = `claim-${claimCount}`;
+            
+            const claimHTML = `
+                <div class="claim-item" id="${claimId}">
+                    <div class="claim-number">Claim #${claimCount}</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control claim-date" data-claim="${claimId}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Starting KM</label>
+                            <input type="number" class="form-control claim-start-km" data-claim="${claimId}" oninput="calculateTotal()" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Closing KM</label>
+                            <input type="number" class="form-control claim-end-km" data-claim="${claimId}" oninput="calculateTotal()" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Reason</label>
+                            <input type="text" class="form-control claim-reason" data-claim="${claimId}" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Starting KM Image</label>
+                            <div class="file-upload">
+                                <input type="file" id="start-img-${claimId}" accept="image/*" onchange="previewImage(this, 'start')">
+                                <label for="start-img-${claimId}" class="file-upload-label">📷 Upload Starting KM Image</label>
+                            </div>
+                            <div class="image-preview" id="preview-start-${claimId}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Closing KM Image</label>
+                            <div class="file-upload">
+                                <input type="file" id="end-img-${claimId}" accept="image/*" onchange="previewImage(this, 'end')">
+                                <label for="end-img-${claimId}" class="file-upload-label">📷 Upload Closing KM Image</label>
+                            </div>
+                            <div class="image-preview" id="preview-end-${claimId}"></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-remove" onclick="removeClaim('${claimId}')">
+                        🗑️ Remove Claim
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('claimsContainer').insertAdjacentHTML('beforeend', claimHTML);
+        }
+
+        let currentEditImage = null;
+        let cropData = {};
+
+        function previewImage(input, type) {
+            const claimId = input.id.split('-').slice(2).join('-');
+            const previewContainer = document.getElementById(`preview-${type}-${claimId}`);
+            previewContainer.innerHTML = '';
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const container = document.createElement('div');
+                    container.className = 'image-preview-container';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.dataset.original = e.target.result;
+                    img.dataset.type = type;
+                    img.dataset.claim = claimId;
+                    
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'image-edit-btn';
+                    editBtn.textContent = '✂️';
+                    editBtn.onclick = function() {
+                        openCropModal(img);
+                    };
+                    
+                    container.appendChild(img);
+                    container.appendChild(editBtn);
+                    previewContainer.appendChild(container);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function openCropModal(img) {
+            currentEditImage = img;
+            const modal = document.getElementById('cropModal');
+            const canvas = document.getElementById('cropCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+                ctx.drawImage(tempImg, 0, 0);
+                
+                cropData = {
+                    startX: 0,
+                    startY: 0,
+                    width: 0,
+                    height: 0,
+                    isDrawing: false
+                };
+            };
+            tempImg.src = img.dataset.original || img.src;
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeCropModal() {
+            document.getElementById('cropModal').style.display = 'none';
+            currentEditImage = null;
+        }
+
+        function initCropCanvas() {
+            const canvas = document.getElementById('cropCanvas');
+            const overlay = document.getElementById('cropOverlay');
+            
+            canvas.addEventListener('mousedown', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                cropData.startX = e.clientX - rect.left;
+                cropData.startY = e.clientY - rect.top;
+                cropData.isDrawing = true;
+            });
+            
+            canvas.addEventListener('mousemove', function(e) {
+                if (!cropData.isDrawing) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const currentX = e.clientX - rect.left;
+                const currentY = e.clientY - rect.top;
+                
+                cropData.width = currentX - cropData.startX;
+                cropData.height = currentY - cropData.startY;
+                
+                overlay.style.left = cropData.startX + 'px';
+                overlay.style.top = cropData.startY + 'px';
+                overlay.style.width = Math.abs(cropData.width) + 'px';
+                overlay.style.height = Math.abs(cropData.height) + 'px';
+                overlay.style.display = 'block';
+            });
+            
+            canvas.addEventListener('mouseup', function() {
+                cropData.isDrawing = false;
+            });
+        }
+
+        function applyCrop() {
+            if (!currentEditImage || cropData.width === 0 || cropData.height === 0) {
+                alert('Please select an area to crop!');
+                return;
+            }
+            
+            const canvas = document.getElementById('cropCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const x = cropData.width < 0 ? cropData.startX + cropData.width : cropData.startX;
+            const y = cropData.height < 0 ? cropData.startY + cropData.height : cropData.startY;
+            const width = Math.abs(cropData.width);
+            const height = Math.abs(cropData.height);
+            
+            const imageData = ctx.getImageData(x, y, width, height);
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.putImageData(imageData, 0, 0);
+            
+            currentEditImage.src = tempCanvas.toDataURL();
+            closeCropModal();
+        }
+
+        function rotateCropImage(direction) {
+            const canvas = document.getElementById('cropCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.height;
+            tempCanvas.height = canvas.width;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+            tempCtx.rotate((direction === 'left' ? -90 : 90) * Math.PI / 180);
+            tempCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+            
+            canvas.width = tempCanvas.width;
+            canvas.height = tempCanvas.height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(tempCanvas, 0, 0);
+        }
+
+        function resetCropImage() {
+            if (!currentEditImage) return;
+            
+            const canvas = document.getElementById('cropCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+                ctx.drawImage(tempImg, 0, 0);
+                
+                document.getElementById('cropOverlay').style.display = 'none';
+                cropData = {
+                    startX: 0,
+                    startY: 0,
+                    width: 0,
+                    height: 0,
+                    isDrawing: false
+                };
+            };
+            tempImg.src = currentEditImage.dataset.original;
+        }
+
+        function removeClaim(claimId) {
+            const claimElement = document.getElementById(claimId);
+            if (claimElement) {
+                claimElement.remove();
+                calculateTotal();
+            }
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            const claimItems = document.querySelectorAll('.claim-item');
+            
+            claimItems.forEach(item => {
+                const startKm = parseFloat(item.querySelector('.claim-start-km').value) || 0;
+                const endKm = parseFloat(item.querySelector('.claim-end-km').value) || 0;
+                const distance = endKm - startKm;
+                
+                if (distance > 0) {
+                    total += distance * 5;
+                }
+            });
+            
+            document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
+            return total;
+        }
+
+        function generateSheet() {
+            const staffName = document.getElementById('staffName').value;
+            const employeeNo = document.getElementById('employeeNo').value;
+            const vehicleNo = document.getElementById('vehicleNo').value;
+            const vehicleName = document.getElementById('vehicleName').value;
+
+            if (!staffName || !employeeNo || !vehicleNo || !vehicleName) {
+                alert('Please fill in all staff details!');
+                return;
+            }
+
+            const claimItems = document.querySelectorAll('.claim-item');
+            if (claimItems.length === 0) {
+                alert('Please add at least one claim!');
+                return;
+            }
+
+            let claimsTableHTML = '';
+            let imagesHTML = '';
+            let serialNo = 1;
+
+            claimItems.forEach(item => {
+                const claimId = item.id;
+                const date = item.querySelector('.claim-date').value;
+                const startKm = parseFloat(item.querySelector('.claim-start-km').value) || 0;
+                const endKm = parseFloat(item.querySelector('.claim-end-km').value) || 0;
+                const reason = item.querySelector('.claim-reason').value;
+                const distance = endKm - startKm;
+                const amount = distance * 5;
+
+                if (!date || !reason) {
+                    alert('Please fill in all claim details!');
+                    return;
+                }
+
+                claimsTableHTML += `
+                    <tr>
+                        <td>${serialNo}</td>
+                        <td>${date}</td>
+                        <td>${startKm}</td>
+                        <td>${endKm}</td>
+                        <td>${distance > 0 ? distance : 0}</td>
+                        <td>${reason}</td>
+                        <td>₹${amount > 0 ? amount.toFixed(2) : '0.00'}</td>
+                    </tr>
+                `;
+
+                const startImgInput = document.getElementById(`start-img-${claimId}`);
+                const endImgInput = document.getElementById(`end-img-${claimId}`);
+
+                if (startImgInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagesHTML += `
+                            <div class="image-item">
+                                <img src="${e.target.result}" alt="Starting KM - Claim ${serialNo}">
+                                <div class="image-caption">Claim #${serialNo} - Starting KM</div>
+                            </div>
+                        `;
+                        updateImagesSection(imagesHTML);
+                    };
+                    reader.readAsDataURL(startImgInput.files[0]);
+                }
+
+                if (endImgInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagesHTML += `
+                            <div class="image-item">
+                                <img src="${e.target.result}" alt="Closing KM - Claim ${serialNo}">
+                                <div class="image-caption">Claim #${serialNo} - Closing KM</div>
+                            </div>
+                        `;
+                        updateImagesSection(imagesHTML);
+                    };
+                    reader.readAsDataURL(endImgInput.files[0]);
+                }
+
+                serialNo++;
+            });
+
+            const totalAmount = calculateTotal();
+
+            const sheetHTML = `
+                <div class="sheet-title">STAFF VEHICLE FUEL CLAIMING FORM SALEM - 1</div>
+                
+                <div class="sheet-section">
+                    <div class="sheet-section-title">Staff Information</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Staff Name:</span>
+                            <span class="info-value">${staffName}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Employee No:</span>
+                            <span class="info-value">${employeeNo}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Vehicle No:</span>
+                            <span class="info-value">${vehicleNo}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Vehicle Name:</span>
+                            <span class="info-value">${vehicleName}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sheet-section">
+                    <div class="sheet-section-title">Fuel Claim Details</div>
+                    <table class="claims-table">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Date</th>
+                                <th>Starting KM</th>
+                                <th>Closing KM</th>
+                                <th>Total KM</th>
+                                <th>Reason</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${claimsTableHTML}
+                            <tr style="background: var(--color-primary); color: white; font-weight: 700;">
+                                <td colspan="6" style="text-align: right;">TOTAL AMOUNT</td>
+                                <td>₹${totalAmount.toFixed(2)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="sheet-section images-section">
+                    <div class="images-grid" id="imagesGrid"></div>
+                </div>
+
+                <div class="sheet-section">
+                    <div class="signature-container">
+                        <div class="signature-box">
+                            <div class="signature-line"></div>
+                            <div class="signature-label">Staff Signature</div>
+                        </div>
+                        <div class="signature-box">
+                            <div class="signature-line"></div>
+                            <div class="signature-label">Manager Signature</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('sheetContent').innerHTML = sheetHTML;
+            document.getElementById('sheetContainer').style.display = 'block';
+            
+            setTimeout(() => {
+                updateImagesSection(imagesHTML);
+            }, 100);
+        }
+
+        function updateImagesSection(imagesHTML) {
+            const imagesGrid = document.getElementById('imagesGrid');
+            if (imagesGrid && imagesHTML) {
+                imagesGrid.innerHTML = imagesHTML;
+            }
+        }
+
+        function closeSheet() {
+            document.getElementById('sheetContainer').style.display = 'none';
+        }
+
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const sheetContent = document.getElementById('sheetContent');
+            
+            const canvas = await html2canvas(sheetContent, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+            
+            const imgWidth = 297;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save('fuel-claim-form.pdf');
+        }
+
+        async function downloadJPG() {
+            const sheetContent = document.getElementById('sheetContent');
+            
+            const canvas = await html2canvas(sheetContent, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+            
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'fuel-claim-form.jpg';
+                link.href = url;
+                link.click();
+            }, 'image/jpeg', 1.0);
+        }
+
+        let imageAlignment = 'landscape';
+
+        function setImageAlignment(alignment) {
+            imageAlignment = alignment;
+            document.querySelectorAll('.alignment-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`align-${alignment}`).classList.add('active');
+        }
+
+        async function downloadJPG() {
+            const sheetContent = document.getElementById('sheetContent');
+            
+            let scale = 2;
+            let canvasWidth = 1200;
+            let canvasHeight = 800;
+            
+            if (imageAlignment === 'portrait') {
+                canvasWidth = 800;
+                canvasHeight = 1200;
+            } else if (imageAlignment === 'landscape') {
+                canvasWidth = 1400;
+                canvasHeight = 900;
+            }
+            
+            const canvas = await html2canvas(sheetContent, {
+                scale: scale,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                width: imageAlignment === 'auto' ? undefined : canvasWidth,
+                height: imageAlignment === 'auto' ? undefined : canvasHeight,
+                windowWidth: imageAlignment === 'auto' ? undefined : canvasWidth,
+                windowHeight: imageAlignment === 'auto' ? undefined : canvasHeight
+            });
+            
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'fuel-claim-form.jpg';
+                link.href = url;
+                link.click();
+            }, 'image/jpeg', 1.0);
+        }
+
+        addClaim();
+        initCropCanvas();
+    </script>
+</body>
+</html>
+
