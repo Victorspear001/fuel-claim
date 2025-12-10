@@ -3,1150 +3,511 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Vehicle Fuel Claiming Form Salem - 1</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>Staff Fuel Claim</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         :root {
-            --color-primary: #dc2626;
-            --color-secondary: #fbbf24;
-            --color-background: #fef3c7;
-            --color-surface: #ffffff;
-            --color-text: #1f2937;
-            --color-border: #fca5a5;
-            --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --space-8: 8px;
-            --space-12: 12px;
-            --space-16: 16px;
-            --space-24: 24px;
-            --radius-base: 8px;
-            --radius-lg: 12px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --primary-red: #D32F2F;
+            --primary-yellow: #FBC02D;
+            --light-yellow: #FFF9C4;
         }
 
         body {
-            font-family: var(--font-family-base);
-            background: linear-gradient(135deg, #fef3c7 0%, #fecaca 100%);
-            min-height: 100vh;
-            padding: var(--space-24);
-            color: var(--color-text);
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .container {
+        /* --- Input Form Styles --- */
+        .main-container {
             max-width: 900px;
-            margin: 0 auto;
-            background: var(--color-surface);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.15);
+            margin: 20px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 8px solid var(--primary-red);
+        }
+
+        .btn-primary { background-color: var(--primary-red); border-color: var(--primary-red); }
+        .btn-warning { background-color: var(--primary-yellow); font-weight: bold; border: 1px solid #F9A825; }
+
+        .claim-row {
+            background-color: var(--light-yellow);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .image-preview-box {
+            width: 100%;
+            height: 120px;
+            border: 2px dashed var(--primary-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            cursor: pointer;
             overflow: hidden;
         }
+        .image-preview-box img { max-height: 100%; object-fit: contain; }
+        .img-container { max-height: 400px; } 
+        .img-container img { max-width: 100%; }
 
-        .header {
-            background: linear-gradient(135deg, var(--color-primary) 0%, #991b1b 100%);
-            color: white;
-            padding: var(--space-24);
-            text-align: center;
+        /* --- PREVIEW SHEET STYLES --- */
+        
+        /* The Base Paper Wrapper */
+        #sheet-wrapper {
+            background: white; 
+            margin: 0 auto; 
+            padding: 10mm; /* General Padding */
+            box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+        /* A5 Specific Dimensions */
+        .size-a5 {
+            width: 210mm; 
+            min-height: 148mm;
+        }
+        
+        /* A4 Specific Dimensions */
+        .size-a4 {
+            width: 297mm;
+            min-height: 210mm;
         }
 
-        .form-content {
-            padding: var(--space-24);
-        }
-
-        .section {
-            margin-bottom: var(--space-24);
-            padding: var(--space-16);
-            background: #fef9f3;
-            border-radius: var(--radius-base);
-            border: 2px solid var(--color-border);
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: var(--space-16);
-            display: flex;
-            align-items: center;
-            gap: var(--space-8);
-        }
-
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 20px;
-            background: var(--color-secondary);
-            border-radius: 2px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--space-16);
-            margin-bottom: var(--space-16);
-        }
-
-        .form-group {
+        /* Main Flex Container for Sticky Footer */
+        #finalSheet {
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
+            min-height: inherit; /* Inherit height from wrapper */
         }
 
-        .form-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--color-text);
-            margin-bottom: var(--space-8);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-control {
-            padding: var(--space-12);
-            border: 2px solid var(--color-border);
-            border-radius: var(--radius-base);
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-        }
-
-        .file-upload {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-upload input[type="file"] {
-            display: none;
-        }
-
-        .file-upload-label {
-            display: block;
-            padding: var(--space-12);
-            background: var(--color-secondary);
-            color: var(--color-text);
+        .sheet-header {
             text-align: center;
-            border-radius: var(--radius-base);
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 2px solid #f59e0b;
+            border-bottom: 2px solid var(--primary-red);
+            margin-bottom: 10px;
+            padding-bottom: 5px;
         }
+        
+        /* Typography Changes based on Size */
+        .size-a5 h2 { font-size: 18px; color: var(--primary-red); margin: 0; }
+        .size-a4 h2 { font-size: 24px; color: var(--primary-red); margin: 0; }
 
-        .file-upload-label:hover {
-            background: #f59e0b;
-            transform: translateY(-2px);
-        }
-
-        .image-preview {
-            margin-top: var(--space-8);
-            display: flex;
-            gap: var(--space-8);
-            flex-wrap: wrap;
-        }
-
-        .image-preview img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: var(--radius-base);
-            border: 2px solid var(--color-border);
-        }
-
-        .image-preview-container {
-            position: relative;
-            display: inline-block;
-        }
-
-        .image-edit-btn {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: var(--color-primary);
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .image-edit-btn:hover {
-            background: #991b1b;
-        }
-
-        .crop-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .crop-container {
-            background: white;
-            padding: var(--space-24);
-            border-radius: var(--radius-lg);
-            max-width: 90%;
-            max-height: 90%;
-            overflow: auto;
-        }
-
-        .crop-canvas-container {
-            position: relative;
-            max-width: 800px;
-            margin: 0 auto var(--space-16);
-            border: 2px solid var(--color-border);
-        }
-
-        .crop-canvas {
-            max-width: 100%;
-            display: block;
-            cursor: crosshair;
-        }
-
-        .crop-overlay {
-            position: absolute;
-            border: 2px dashed var(--color-primary);
-            background: rgba(220, 38, 38, 0.1);
-            pointer-events: none;
-        }
-
-        .crop-controls {
-            display: flex;
-            gap: var(--space-12);
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .claim-item {
-            background: white;
-            padding: var(--space-16);
-            border-radius: var(--radius-base);
-            border: 2px solid var(--color-secondary);
-            margin-bottom: var(--space-16);
-            position: relative;
-        }
-
-        .claim-number {
-            position: absolute;
-            top: -12px;
-            left: var(--space-16);
-            background: var(--color-primary);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 12px;
-        }
-
-        .btn {
-            padding: var(--space-12) var(--space-24);
-            border: none;
-            border-radius: var(--radius-base);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-8);
-        }
-
-        .btn-primary {
-            background: var(--color-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #991b1b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-        }
-
-        .btn-secondary {
-            background: var(--color-secondary);
-            color: var(--color-text);
-        }
-
-        .btn-secondary:hover {
-            background: #f59e0b;
-            transform: translateY(-2px);
-        }
-
-        .btn-remove {
-            background: #ef4444;
-            color: white;
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-
-        .btn-remove:hover {
-            background: #dc2626;
-        }
-
-        .button-group {
-            display: flex;
-            gap: var(--space-12);
-            justify-content: center;
-            margin-top: var(--space-24);
-        }
-
-        .total-section {
-            background: linear-gradient(135deg, var(--color-primary) 0%, #991b1b 100%);
-            color: white;
-            padding: var(--space-24);
-            border-radius: var(--radius-base);
-            text-align: center;
-            margin-top: var(--space-24);
-        }
-
-        .total-label {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: var(--space-8);
-        }
-
-        .total-amount {
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .sheet-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            overflow: auto;
-            padding: var(--space-24);
-        }
-
-        .sheet-content {
-            background: white;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px;
-        }
-
-        @media print {
-            body {
-                background: white;
-            }
-            .sheet-content {
-                max-width: 100%;
-            }
-        }
-
-        .sheet-title {
-            text-align: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--color-primary);
-            margin-bottom: var(--space-24);
-            text-transform: uppercase;
-            border-bottom: 3px solid var(--color-primary);
-            padding-bottom: var(--space-12);
-        }
-
-        .sheet-section {
-            margin-bottom: var(--space-24);
-        }
-
-        .sheet-section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: var(--space-12);
-            background: var(--color-background);
-            padding: var(--space-8) var(--space-16);
-            border-left: 4px solid var(--color-primary);
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: var(--space-12);
-            margin-bottom: var(--space-16);
-        }
-
-        .info-item {
-            display: flex;
-            gap: var(--space-8);
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: var(--color-text);
-            min-width: 140px;
-        }
-
-        .info-value {
-            color: var(--color-text);
-        }
-
-        .claims-table {
+        .sheet-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: var(--space-24);
+            margin-bottom: 15px;
         }
+        .size-a5 .sheet-table { font-size: 11px; }
+        .size-a4 .sheet-table { font-size: 14px; }
 
-        .claims-table th,
-        .claims-table td {
-            border: 2px solid var(--color-border);
-            padding: var(--space-12);
-            text-align: left;
+        .sheet-table th, .sheet-table td {
+            border: 1px solid #333;
+            padding: 5px;
         }
-
-        .claims-table th {
-            background: var(--color-primary);
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-
-        .claims-table tr:nth-child(even) {
-            background: var(--color-background);
-        }
-
-        .images-section {
-            margin-top: var(--space-24);
-        }
-
-        .images-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: var(--space-16);
-        }
-
-        .image-item {
+        .sheet-table th {
+            background-color: var(--primary-yellow) !important;
+            color: black;
             text-align: center;
         }
 
-        .image-item img {
+        /* --- IMAGE ALIGNMENT LOGIC --- */
+        .sheet-images-section {
+            display: flex;
+            flex-direction: column; /* Forces each claim group to stack vertically */
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* The container for ONE claim (Start + End images) */
+        .claim-image-group {
+            border: 1px solid #ccc;
+            padding: 8px;
+            page-break-inside: avoid; 
+            background: #fff;
             width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border: 2px solid var(--color-border);
-            border-radius: var(--radius-base);
         }
 
-        .image-caption {
-            font-size: 12px;
-            color: var(--color-text);
-            margin-top: var(--space-8);
-            font-weight: 600;
+        .claim-image-group h6 {
+            margin-bottom: 5px;
+            color: var(--primary-red);
+            font-weight: bold;
         }
+        .size-a5 .claim-image-group h6 { font-size: 11px; }
+        .size-a4 .claim-image-group h6 { font-size: 14px; }
 
-        .signature-container {
+        .image-pair {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+        }
+        
+        .claim-image-group img {
+            border: 1px solid #eee;
+        }
+        
+        /* Image sizes adapt to paper */
+        .size-a5 .claim-image-group img { height: 90px; }
+        .size-a4 .claim-image-group img { height: 130px; }
+
+        .img-caption {
+            display: block;
+            text-align: center;
+            font-weight: bold;
+        }
+        .size-a5 .img-caption { font-size: 9px; }
+        .size-a4 .img-caption { font-size: 12px; }
+
+        /* Signatures sticky to bottom */
+        .signatures {
+            margin-top: auto; 
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-top: var(--space-24);
-            padding: 0 60px;
-            gap: 120px;
+            padding: 20px 40px 0 40px;
         }
-
         .signature-box {
-            flex: 0 0 200px;
             text-align: center;
-        }
-
-        .signature-line {
-            border-top: 2px solid var(--color-text);
-            margin: 40px 0 var(--space-8);
+            border-top: 1px solid black;
             width: 200px;
+            padding-top: 5px;
+            font-weight: bold;
         }
+        .size-a5 .signature-box { font-size: 12px; }
+        .size-a4 .signature-box { font-size: 14px; }
 
-        .signature-label {
-            font-weight: 600;
-            color: var(--color-text);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .alignment-controls {
-            display: flex;
-            gap: var(--space-12);
-            margin-bottom: var(--space-16);
-            flex-wrap: wrap;
-        }
-
-        .alignment-btn {
-            padding: var(--space-8) var(--space-16);
-            border: 2px solid var(--color-border);
-            background: white;
-            border-radius: var(--radius-base);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .alignment-btn:hover {
-            background: var(--color-secondary);
-            border-color: #f59e0b;
-        }
-
-        .alignment-btn.active {
-            background: var(--color-primary);
-            color: white;
-            border-color: var(--color-primary);
-        }
-
-        .close-sheet {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--color-primary);
-            color: white;
-            border: none;
-            padding: var(--space-12) var(--space-24);
-            border-radius: var(--radius-base);
-            cursor: pointer;
-            font-weight: 600;
-            z-index: 1001;
-        }
-
-        .close-sheet:hover {
-            background: #991b1b;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>STAFF VEHICLE FUEL CLAIMING FORM SALEM - 1</h1>
+
+    <div class="main-container">
+        <h3 class="text-center text-danger mb-4">Staff Vehicle Fuel Claim Form Salem-1</h3>
+        
+        <div class="row g-2 mb-3">
+            <div class="col-md-6"><input type="text" class="form-control" id="staffName" placeholder="Staff Name"></div>
+            <div class="col-md-6"><input type="text" class="form-control" id="empNo" placeholder="Employee No"></div>
+            <div class="col-md-6"><input type="text" class="form-control" id="vehicleName" placeholder="Vehicle Name"></div>
+            <div class="col-md-6"><input type="text" class="form-control" id="vehicleNo" placeholder="Vehicle No"></div>
         </div>
 
-        <div class="form-content">
-            <!-- Staff Details Section -->
-            <div class="section">
-                <div class="section-title">Staff Details</div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Staff Name</label>
-                        <input type="text" class="form-control" id="staffName" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Employee No</label>
-                        <input type="text" class="form-control" id="employeeNo" required>
+        <div id="claimsContainer"></div>
+
+        <div class="d-flex justify-content-between mt-3 mb-4">
+            <button type="button" class="btn btn-warning btn-sm" onclick="addClaimRow()">+ Add Claim</button>
+        </div>
+
+        <hr>
+
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-6 text-end"><label class="fw-bold">Select Sheet Size:</label></div>
+            <div class="col-md-6">
+                <select id="paperSizeSelect" class="form-select w-50">
+                    <option value="a5" selected>A5 Landscape (Small)</option>
+                    <option value="a4">A4 Landscape (Large)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="d-grid">
+            <button type="button" class="btn btn-primary btn-lg" onclick="generatePreview()">
+                Preview & Download Sheet
+            </button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crop Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="img-container">
+                        <img id="imageToCrop" src="">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Vehicle No</label>
-                        <input type="text" class="form-control" id="vehicleNo" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Vehicle Name</label>
-                        <input type="text" class="form-control" id="vehicleName" required>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="cropBtn">Save Crop</button>
                 </div>
-            </div>
-
-            <!-- Fuel Claims Section -->
-            <div class="section">
-                <div class="section-title">Fuel Claim Details</div>
-                <div id="claimsContainer"></div>
-                <button type="button" class="btn btn-secondary" onclick="addClaim()">
-                    ➕ Add Another Claim
-                </button>
-            </div>
-
-            <!-- Total Section -->
-            <div class="total-section">
-                <div class="total-label">TOTAL CLAIM AMOUNT</div>
-                <div class="total-amount" id="totalAmount">₹0.00</div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="button-group">
-                <button type="button" class="btn btn-primary" onclick="generateSheet()">
-                    📄 Generate Final Sheet
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Crop Modal -->
-    <div class="crop-modal" id="cropModal">
-        <div class="crop-container">
-            <h2 style="margin-bottom: var(--space-16); color: var(--color-primary);">Edit & Crop Image</h2>
-            <div class="crop-canvas-container">
-                <canvas id="cropCanvas" class="crop-canvas"></canvas>
-                <div id="cropOverlay" class="crop-overlay"></div>
-            </div>
-            <div class="crop-controls">
-                <button class="btn btn-secondary" onclick="rotateCropImage('left')">↺ Rotate Left</button>
-                <button class="btn btn-secondary" onclick="rotateCropImage('right')">↻ Rotate Right</button>
-                <button class="btn btn-secondary" onclick="resetCropImage()">🔄 Reset</button>
-                <button class="btn btn-primary" onclick="applyCrop()">✓ Apply Crop</button>
-                <button class="btn btn-remove" onclick="closeCropModal()">✕ Cancel</button>
-            </div>
-        </div>
-    </div>
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title text-white">Sheet Preview</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="background: #555; overflow: auto;">
+                    
+                    <div id="sheet-wrapper" class="size-a5">
+                        <div id="finalSheet">
+                            
+                            <div>
+                                <div class="sheet-header">
+                                    <h2>STAFF VEHICLE FUEL CLAIMING FORM SALEM - 1</h2>
+                                </div>
 
-    <!-- Final Sheet Modal -->
-    <div class="sheet-container" id="sheetContainer">
-        <button class="close-sheet" onclick="closeSheet()">✕ Close</button>
-        <div class="sheet-content" id="sheetContent">
-            <!-- Generated sheet will appear here -->
-        </div>
-        <div style="margin-top: 20px;">
-            <div class="alignment-controls" style="justify-content: center; background: white; padding: var(--space-16); border-radius: var(--radius-base);">
-                <span style="font-weight: 600; align-self: center;">JPG Image Alignment:</span>
-                <button class="alignment-btn" onclick="setImageAlignment('portrait')" id="align-portrait">📄 Portrait</button>
-                <button class="alignment-btn active" onclick="setImageAlignment('landscape')" id="align-landscape">🖼️ Landscape</button>
-                <button class="alignment-btn" onclick="setImageAlignment('auto')" id="align-auto">📏 Auto Fit</button>
-            </div>
-            <div class="button-group" style="margin-top: var(--space-16);">
-                <button type="button" class="btn btn-primary" onclick="downloadPDF()">
-                    📥 Download as PDF
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="downloadJPG()">
-                    📥 Download as JPG
-                </button>
+                                <table class="sheet-table">
+                                    <tr>
+                                        <th width="15%">Name</th>
+                                        <td width="35%" id="p-staffName"></td>
+                                        <th width="15%">Emp No</th>
+                                        <td width="35%" id="p-empNo"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <td id="p-vehicleName"></td>
+                                        <th>Reg No</th>
+                                        <td id="p-vehicleNo"></td>
+                                    </tr>
+                                </table>
+
+                                <table class="sheet-table">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No</th>
+                                            <th>Date</th>
+                                            <th>Reason</th>
+                                            <th>Start KM</th>
+                                            <th>End KM</th>
+                                            <th>Tot KM</th>
+                                            <th>Amt (Rs.5)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="p-tbody"></tbody>
+                                    <tfoot>
+                                        <tr style="background:#eee;">
+                                            <td colspan="6" style="text-align:right; font-weight:bold;">Total Amount:</td>
+                                            <td id="p-grandTotal" style="font-weight:bold;"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                                <div class="sheet-header" style="border:none; margin-top:10px;">
+                                    <h6 style="color:black; text-decoration: underline; font-weight:bold;">Meter Readings:</h6>
+                                </div>
+                                
+                                <div id="p-images" class="sheet-images-section"></div>
+                            </div>
+
+                            <div class="signatures">
+                                <div class="signature-box">Staff Signature</div>
+                                <div class="signature-box">Manager Signature</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Edit</button>
+                    <button type="button" class="btn btn-info text-white fw-bold" onclick="downloadJPG()">Download JPG</button>
+                    <button type="button" class="btn btn-success fw-bold" onclick="downloadPDF()">Download PDF</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         let claimCount = 0;
-        const claims = [];
+        let cropper;
+        let currentEditTarget = null;
 
-        function addClaim() {
+        document.addEventListener('DOMContentLoaded', () => { addClaimRow(); });
+
+        function addClaimRow() {
             claimCount++;
-            const claimId = `claim-${claimCount}`;
-            
-            const claimHTML = `
-                <div class="claim-item" id="${claimId}">
-                    <div class="claim-number">Claim #${claimCount}</div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Date</label>
-                            <input type="date" class="form-control claim-date" data-claim="${claimId}" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Starting KM</label>
-                            <input type="number" class="form-control claim-start-km" data-claim="${claimId}" oninput="calculateTotal()" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Closing KM</label>
-                            <input type="number" class="form-control claim-end-km" data-claim="${claimId}" oninput="calculateTotal()" required>
-                        </div>
+            const container = document.getElementById('claimsContainer');
+            const div = document.createElement('div');
+            div.className = 'claim-row';
+            div.id = `claim-row-${claimCount}`;
+            div.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="badge bg-warning text-dark">Trip #${claimCount}</span>
+                    <button class="btn btn-sm btn-outline-danger" onclick="this.closest('.claim-row').remove()">X</button>
+                </div>
+                <div class="row g-2">
+                    <div class="col-4"><input type="date" class="form-control form-control-sm claim-date"></div>
+                    <div class="col-8"><input type="text" class="form-control form-control-sm claim-reason" placeholder="Reason"></div>
+                    <div class="col-3"><small>Start KM</small><input type="number" class="form-control form-control-sm claim-start" oninput="calculateRow(${claimCount})"></div>
+                    <div class="col-3"><small>End KM</small><input type="number" class="form-control form-control-sm claim-end" oninput="calculateRow(${claimCount})"></div>
+                    <div class="col-3"><small>Total KM</small><input type="text" class="form-control form-control-sm claim-total" readonly></div>
+                    <div class="col-3"><small>Amount</small><input type="text" class="form-control form-control-sm claim-amount" readonly></div>
+                    <div class="col-6 mt-2">
+                        <div class="image-preview-box" id="preview-start-${claimCount}" onclick="triggerFileClick(this)"><small class="text-muted">Start Img</small></div>
+                        <input type="file" accept="image/*" style="display:none" onchange="loadImage(this, 'start', ${claimCount})">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Reason</label>
-                            <input type="text" class="form-control claim-reason" data-claim="${claimId}" required>
-                        </div>
+                    <div class="col-6 mt-2">
+                        <div class="image-preview-box" id="preview-end-${claimCount}" onclick="triggerFileClick(this)"><small class="text-muted">End Img</small></div>
+                        <input type="file" accept="image/*" style="display:none" onchange="loadImage(this, 'end', ${claimCount})">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Starting KM Image</label>
-                            <div class="file-upload">
-                                <input type="file" id="start-img-${claimId}" accept="image/*" onchange="previewImage(this, 'start')">
-                                <label for="start-img-${claimId}" class="file-upload-label">📷 Upload Starting KM Image</label>
-                            </div>
-                            <div class="image-preview" id="preview-start-${claimId}"></div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Closing KM Image</label>
-                            <div class="file-upload">
-                                <input type="file" id="end-img-${claimId}" accept="image/*" onchange="previewImage(this, 'end')">
-                                <label for="end-img-${claimId}" class="file-upload-label">📷 Upload Closing KM Image</label>
-                            </div>
-                            <div class="image-preview" id="preview-end-${claimId}"></div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-remove" onclick="removeClaim('${claimId}')">
-                        🗑️ Remove Claim
-                    </button>
                 </div>
             `;
-            
-            document.getElementById('claimsContainer').insertAdjacentHTML('beforeend', claimHTML);
+            container.appendChild(div);
         }
 
-        let currentEditImage = null;
-        let cropData = {};
+        function calculateRow(id) {
+            const row = document.getElementById(`claim-row-${id}`);
+            if(!row) return;
+            const start = parseFloat(row.querySelector('.claim-start').value) || 0;
+            const end = parseFloat(row.querySelector('.claim-end').value) || 0;
+            if (end > start && start > 0) {
+                const diff = end - start;
+                row.querySelector('.claim-total').value = diff;
+                row.querySelector('.claim-amount').value = (diff * 5).toFixed(2);
+            } else {
+                row.querySelector('.claim-total').value = 0;
+                row.querySelector('.claim-amount').value = 0;
+            }
+        }
 
-        function previewImage(input, type) {
-            const claimId = input.id.split('-').slice(2).join('-');
-            const previewContainer = document.getElementById(`preview-${type}-${claimId}`);
-            previewContainer.innerHTML = '';
-            
+        function triggerFileClick(div) { div.nextElementSibling.click(); }
+
+        function loadImage(input, type, id) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const container = document.createElement('div');
-                    container.className = 'image-preview-container';
-                    
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.dataset.original = e.target.result;
-                    img.dataset.type = type;
-                    img.dataset.claim = claimId;
-                    
-                    const editBtn = document.createElement('button');
-                    editBtn.className = 'image-edit-btn';
-                    editBtn.textContent = '✂️';
-                    editBtn.onclick = function() {
-                        openCropModal(img);
-                    };
-                    
-                    container.appendChild(img);
-                    container.appendChild(editBtn);
-                    previewContainer.appendChild(container);
+                    const image = document.getElementById('imageToCrop');
+                    image.src = e.target.result;
+                    currentEditTarget = { id, type };
+                    const modalEl = document.getElementById('cropperModal');
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                    modalEl.addEventListener('shown.bs.modal', function () {
+                        if(cropper) cropper.destroy();
+                        cropper = new Cropper(image, { viewMode: 1, autoCropArea: 0.8 });
+                    }, { once: true });
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function openCropModal(img) {
-            currentEditImage = img;
-            const modal = document.getElementById('cropModal');
-            const canvas = document.getElementById('cropCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const tempImg = new Image();
-            tempImg.onload = function() {
-                canvas.width = tempImg.width;
-                canvas.height = tempImg.height;
-                ctx.drawImage(tempImg, 0, 0);
-                
-                cropData = {
-                    startX: 0,
-                    startY: 0,
-                    width: 0,
-                    height: 0,
-                    isDrawing: false
-                };
-            };
-            tempImg.src = img.dataset.original || img.src;
-            
-            modal.style.display = 'flex';
-        }
+        document.getElementById('cropBtn').addEventListener('click', function() {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas();
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            const previewBox = document.getElementById(`preview-${currentEditTarget.type}-${currentEditTarget.id}`);
+            previewBox.innerHTML = `<img src="${dataUrl}">`;
+            previewBox.dataset.img = dataUrl;
+            bootstrap.Modal.getInstance(document.getElementById('cropperModal')).hide();
+        });
 
-        function closeCropModal() {
-            document.getElementById('cropModal').style.display = 'none';
-            currentEditImage = null;
-        }
+        function generatePreview() {
+            // 1. Apply Selected Paper Size
+            const size = document.getElementById('paperSizeSelect').value;
+            const wrapper = document.getElementById('sheet-wrapper');
+            wrapper.className = ''; // reset
+            wrapper.classList.add(size === 'a4' ? 'size-a4' : 'size-a5');
 
-        function initCropCanvas() {
-            const canvas = document.getElementById('cropCanvas');
-            const overlay = document.getElementById('cropOverlay');
-            
-            canvas.addEventListener('mousedown', function(e) {
-                const rect = canvas.getBoundingClientRect();
-                cropData.startX = e.clientX - rect.left;
-                cropData.startY = e.clientY - rect.top;
-                cropData.isDrawing = true;
-            });
-            
-            canvas.addEventListener('mousemove', function(e) {
-                if (!cropData.isDrawing) return;
-                
-                const rect = canvas.getBoundingClientRect();
-                const currentX = e.clientX - rect.left;
-                const currentY = e.clientY - rect.top;
-                
-                cropData.width = currentX - cropData.startX;
-                cropData.height = currentY - cropData.startY;
-                
-                overlay.style.left = cropData.startX + 'px';
-                overlay.style.top = cropData.startY + 'px';
-                overlay.style.width = Math.abs(cropData.width) + 'px';
-                overlay.style.height = Math.abs(cropData.height) + 'px';
-                overlay.style.display = 'block';
-            });
-            
-            canvas.addEventListener('mouseup', function() {
-                cropData.isDrawing = false;
-            });
-        }
+            // 2. Populate Data
+            document.getElementById('p-staffName').textContent = document.getElementById('staffName').value;
+            document.getElementById('p-empNo').textContent = document.getElementById('empNo').value;
+            document.getElementById('p-vehicleName').textContent = document.getElementById('vehicleName').value;
+            document.getElementById('p-vehicleNo').textContent = document.getElementById('vehicleNo').value;
 
-        function applyCrop() {
-            if (!currentEditImage || cropData.width === 0 || cropData.height === 0) {
-                alert('Please select an area to crop!');
-                return;
-            }
-            
-            const canvas = document.getElementById('cropCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const x = cropData.width < 0 ? cropData.startX + cropData.width : cropData.startX;
-            const y = cropData.height < 0 ? cropData.startY + cropData.height : cropData.startY;
-            const width = Math.abs(cropData.width);
-            const height = Math.abs(cropData.height);
-            
-            const imageData = ctx.getImageData(x, y, width, height);
-            
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = width;
-            tempCanvas.height = height;
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.putImageData(imageData, 0, 0);
-            
-            currentEditImage.src = tempCanvas.toDataURL();
-            closeCropModal();
-        }
+            const tbody = document.getElementById('p-tbody');
+            const imgContainer = document.getElementById('p-images');
+            tbody.innerHTML = '';
+            imgContainer.innerHTML = '';
+            let grandTotal = 0;
+            let serial = 1;
 
-        function rotateCropImage(direction) {
-            const canvas = document.getElementById('cropCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = canvas.height;
-            tempCanvas.height = canvas.width;
-            const tempCtx = tempCanvas.getContext('2d');
-            
-            tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-            tempCtx.rotate((direction === 'left' ? -90 : 90) * Math.PI / 180);
-            tempCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
-            
-            canvas.width = tempCanvas.width;
-            canvas.height = tempCanvas.height;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(tempCanvas, 0, 0);
-        }
+            const rows = document.querySelectorAll('.claim-row');
+            rows.forEach(row => {
+                const date = row.querySelector('.claim-date').value;
+                const reason = row.querySelector('.claim-reason').value;
+                const start = row.querySelector('.claim-start').value;
+                const end = row.querySelector('.claim-end').value;
+                const total = row.querySelector('.claim-total').value;
+                const amount = parseFloat(row.querySelector('.claim-amount').value) || 0;
+                grandTotal += amount;
 
-        function resetCropImage() {
-            if (!currentEditImage) return;
-            
-            const canvas = document.getElementById('cropCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            const tempImg = new Image();
-            tempImg.onload = function() {
-                canvas.width = tempImg.width;
-                canvas.height = tempImg.height;
-                ctx.drawImage(tempImg, 0, 0);
-                
-                document.getElementById('cropOverlay').style.display = 'none';
-                cropData = {
-                    startX: 0,
-                    startY: 0,
-                    width: 0,
-                    height: 0,
-                    isDrawing: false
-                };
-            };
-            tempImg.src = currentEditImage.dataset.original;
-        }
-
-        function removeClaim(claimId) {
-            const claimElement = document.getElementById(claimId);
-            if (claimElement) {
-                claimElement.remove();
-                calculateTotal();
-            }
-        }
-
-        function calculateTotal() {
-            let total = 0;
-            const claimItems = document.querySelectorAll('.claim-item');
-            
-            claimItems.forEach(item => {
-                const startKm = parseFloat(item.querySelector('.claim-start-km').value) || 0;
-                const endKm = parseFloat(item.querySelector('.claim-end-km').value) || 0;
-                const distance = endKm - startKm;
-                
-                if (distance > 0) {
-                    total += distance * 5;
-                }
-            });
-            
-            document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
-            return total;
-        }
-
-        function generateSheet() {
-            const staffName = document.getElementById('staffName').value;
-            const employeeNo = document.getElementById('employeeNo').value;
-            const vehicleNo = document.getElementById('vehicleNo').value;
-            const vehicleName = document.getElementById('vehicleName').value;
-
-            if (!staffName || !employeeNo || !vehicleNo || !vehicleName) {
-                alert('Please fill in all staff details!');
-                return;
-            }
-
-            const claimItems = document.querySelectorAll('.claim-item');
-            if (claimItems.length === 0) {
-                alert('Please add at least one claim!');
-                return;
-            }
-
-            let claimsTableHTML = '';
-            let imagesHTML = '';
-            let serialNo = 1;
-
-            claimItems.forEach(item => {
-                const claimId = item.id;
-                const date = item.querySelector('.claim-date').value;
-                const startKm = parseFloat(item.querySelector('.claim-start-km').value) || 0;
-                const endKm = parseFloat(item.querySelector('.claim-end-km').value) || 0;
-                const reason = item.querySelector('.claim-reason').value;
-                const distance = endKm - startKm;
-                const amount = distance * 5;
-
-                if (!date || !reason) {
-                    alert('Please fill in all claim details!');
-                    return;
-                }
-
-                claimsTableHTML += `
+                // Table Row
+                tbody.innerHTML += `
                     <tr>
-                        <td>${serialNo}</td>
+                        <td class="text-center">${serial}</td>
                         <td>${date}</td>
-                        <td>${startKm}</td>
-                        <td>${endKm}</td>
-                        <td>${distance > 0 ? distance : 0}</td>
                         <td>${reason}</td>
-                        <td>₹${amount > 0 ? amount.toFixed(2) : '0.00'}</td>
+                        <td class="text-center">${start}</td>
+                        <td class="text-center">${end}</td>
+                        <td class="text-center">${total}</td>
+                        <td class="text-end">Rs. ${amount.toFixed(2)}</td>
                     </tr>
                 `;
 
-                const startImgInput = document.getElementById(`start-img-${claimId}`);
-                const endImgInput = document.getElementById(`end-img-${claimId}`);
+                // Images - Grouped perfectly vertically
+                const startImg = row.querySelector(`[id^="preview-start"]`).dataset.img;
+                const endImg = row.querySelector(`[id^="preview-end"]`).dataset.img;
 
-                if (startImgInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        imagesHTML += `
-                            <div class="image-item">
-                                <img src="${e.target.result}" alt="Starting KM - Claim ${serialNo}">
-                                <div class="image-caption">Claim #${serialNo} - Starting KM</div>
+                if(startImg || endImg) {
+                    imgContainer.innerHTML += `
+                        <div class="claim-image-group">
+                            <h6>#${serial} - ${reason}</h6>
+                            <div class="image-pair">
+                                <div class="text-center">
+                                    ${startImg ? `<img src="${startImg}"><br><span class="img-caption">Start: ${start} KM</span>` : ''}
+                                </div>
+                                <div class="text-center">
+                                    ${endImg ? `<img src="${endImg}"><br><span class="img-caption">End: ${end} KM</span>` : ''}
+                                </div>
                             </div>
-                        `;
-                        updateImagesSection(imagesHTML);
-                    };
-                    reader.readAsDataURL(startImgInput.files[0]);
+                        </div>
+                    `;
                 }
-
-                if (endImgInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        imagesHTML += `
-                            <div class="image-item">
-                                <img src="${e.target.result}" alt="Closing KM - Claim ${serialNo}">
-                                <div class="image-caption">Claim #${serialNo} - Closing KM</div>
-                            </div>
-                        `;
-                        updateImagesSection(imagesHTML);
-                    };
-                    reader.readAsDataURL(endImgInput.files[0]);
-                }
-
-                serialNo++;
+                serial++;
             });
 
-            const totalAmount = calculateTotal();
-
-            const sheetHTML = `
-                <div class="sheet-title">STAFF VEHICLE FUEL CLAIMING FORM SALEM - 1</div>
-                
-                <div class="sheet-section">
-                    <div class="sheet-section-title">Staff Information</div>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Staff Name:</span>
-                            <span class="info-value">${staffName}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Employee No:</span>
-                            <span class="info-value">${employeeNo}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Vehicle No:</span>
-                            <span class="info-value">${vehicleNo}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Vehicle Name:</span>
-                            <span class="info-value">${vehicleName}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sheet-section">
-                    <div class="sheet-section-title">Fuel Claim Details</div>
-                    <table class="claims-table">
-                        <thead>
-                            <tr>
-                                <th>S.No</th>
-                                <th>Date</th>
-                                <th>Starting KM</th>
-                                <th>Closing KM</th>
-                                <th>Total KM</th>
-                                <th>Reason</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${claimsTableHTML}
-                            <tr style="background: var(--color-primary); color: white; font-weight: 700;">
-                                <td colspan="6" style="text-align: right;">TOTAL AMOUNT</td>
-                                <td>₹${totalAmount.toFixed(2)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="sheet-section images-section">
-                    <div class="images-grid" id="imagesGrid"></div>
-                </div>
-
-                <div class="sheet-section">
-                    <div class="signature-container">
-                        <div class="signature-box">
-                            <div class="signature-line"></div>
-                            <div class="signature-label">Staff Signature</div>
-                        </div>
-                        <div class="signature-box">
-                            <div class="signature-line"></div>
-                            <div class="signature-label">Manager Signature</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('sheetContent').innerHTML = sheetHTML;
-            document.getElementById('sheetContainer').style.display = 'block';
-            
-            setTimeout(() => {
-                updateImagesSection(imagesHTML);
-            }, 100);
+            document.getElementById('p-grandTotal').innerText = `Rs. ${grandTotal.toFixed(2)}`;
+            new bootstrap.Modal(document.getElementById('previewModal')).show();
         }
 
-        function updateImagesSection(imagesHTML) {
-            const imagesGrid = document.getElementById('imagesGrid');
-            if (imagesGrid && imagesHTML) {
-                imagesGrid.innerHTML = imagesHTML;
-            }
+        function downloadPDF() {
+            const element = document.getElementById('sheet-wrapper');
+            const staffName = document.getElementById('staffName').value || 'Claim';
+            const size = document.getElementById('paperSizeSelect').value;
+            
+            const opt = {
+                margin: 0,
+                filename: `Fuel_Claim_${staffName}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                // Dynamically set format based on dropdown
+                jsPDF: { unit: 'mm', format: size, orientation: 'landscape' }
+            };
+
+            const btn = document.querySelector('.btn-success');
+            btn.innerText = "Generating...";
+            html2pdf().set(opt).from(element).save().then(() => { btn.innerText = "Download PDF"; });
         }
 
-        function closeSheet() {
-            document.getElementById('sheetContainer').style.display = 'none';
-        }
-
-        async function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const sheetContent = document.getElementById('sheetContent');
-            
-            const canvas = await html2canvas(sheetContent, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff'
-            });
-            
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: 'a4'
-            });
-            
-            const imgWidth = 297;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
-            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-            pdf.save('fuel-claim-form.pdf');
-        }
-
-        async function downloadJPG() {
-            const sheetContent = document.getElementById('sheetContent');
-            
-            const canvas = await html2canvas(sheetContent, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff'
-            });
-            
-            canvas.toBlob(function(blob) {
-                const url = URL.createObjectURL(blob);
+        function downloadJPG() {
+            const element = document.getElementById('sheet-wrapper');
+            const staffName = document.getElementById('staffName').value || 'Claim';
+            const btn = document.querySelector('.btn-info');
+            btn.innerText = "Generating...";
+            html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'fuel-claim-form.jpg';
-                link.href = url;
+                link.download = `Fuel_Claim_${staffName}.jpg`;
+                link.href = canvas.toDataURL("image/jpeg", 0.9);
                 link.click();
-            }, 'image/jpeg', 1.0);
-        }
-
-        let imageAlignment = 'landscape';
-
-        function setImageAlignment(alignment) {
-            imageAlignment = alignment;
-            document.querySelectorAll('.alignment-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`align-${alignment}`).classList.add('active');
-        }
-
-        async function downloadJPG() {
-            const sheetContent = document.getElementById('sheetContent');
-            
-            let scale = 2;
-            let canvasWidth = 1200;
-            let canvasHeight = 800;
-            
-            if (imageAlignment === 'portrait') {
-                canvasWidth = 800;
-                canvasHeight = 1200;
-            } else if (imageAlignment === 'landscape') {
-                canvasWidth = 1400;
-                canvasHeight = 900;
-            }
-            
-            const canvas = await html2canvas(sheetContent, {
-                scale: scale,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-                width: imageAlignment === 'auto' ? undefined : canvasWidth,
-                height: imageAlignment === 'auto' ? undefined : canvasHeight,
-                windowWidth: imageAlignment === 'auto' ? undefined : canvasWidth,
-                windowHeight: imageAlignment === 'auto' ? undefined : canvasHeight
+                btn.innerText = "Download JPG";
             });
-            
-            canvas.toBlob(function(blob) {
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = 'fuel-claim-form.jpg';
-                link.href = url;
-                link.click();
-            }, 'image/jpeg', 1.0);
         }
-
-        addClaim();
-        initCropCanvas();
     </script>
 </body>
 </html>
-
